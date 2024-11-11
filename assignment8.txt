@@ -1,0 +1,155 @@
+assignment8
+
+
+use assess
+db.createCollection("courses")
+db.createCollection("students")
+db.courses.insertMany([{course_name:"python"},{course_name:"dbms"},{course_name:"java"}])
+
+db.students.insertMany([{name:"Sam",age:22,a_id:ObjectId('672f2ef30236db81e646b7a7'),score:67},{name:"Ram",age:21,a_id:ObjectId('672f2ef30236db81e646b7a8'),score:80},{name:"Manu",age:20,a_id:ObjectId('672f2ef30236db81e646b7a9'),score:79}]) 
+
+ db.students.aggregate([{$lookup:{from:"courses", localField:"course_id", foreignField:"a_id", as:"fullAddress"}}])  
+ 
+db.students.aggregate([{$lookup:{from:"courses", localField:"course_id", foreignField:"a_id", as:"fullAddress"}}, {$match:{score:{$gt:75}}}])
+
+db.orders.aggregate([
+    {
+        $lookup: {
+            from: "customers",
+            localField: "customerId",
+            foreignField: "_id",
+            as: "customerDetails"
+        }
+    },
+    {
+        $unwind: "$customerDetails"
+    },
+    {
+        $match: {
+            amount: { $gt: 500 },
+            "customerDetails.location": "New York"
+        }
+    }
+]);
+db.sales.aggregate([
+    {
+        $lookup: {
+            from: "products",
+            localField: "productId",
+            foreignField: "_id",
+            as: "productDetails"
+        }
+    },
+    {
+        $unwind: "$productDetails"
+    },
+    {
+        $match: { "productDetails.price": { $gt: 20 } }
+    },
+    {
+        $group: {
+            _id: "$productId",
+            totalRevenue: { $sum: { $multiply: ["$quantity", "$productDetails.price"] } }
+        }
+    }
+]);
+
+db.employees.aggregate([
+    {
+        $match: {
+            department: { $in: ["HR", "Engineering", "Marketing"] }
+        }
+    }
+]);
+db.transactions.aggregate([
+    {
+        $match: {
+            $or: [
+                { type: "credit" },
+                { amount: { $gt: 1000 } }
+            ]
+        }
+    }
+]);
+db.orders.aggregate([
+    {
+        $lookup: {
+            from: "customers",
+            localField: "customerId",
+            foreignField: "_id",
+            as: "customerDetails"
+        }
+    },
+    {
+        $unwind: "$customerDetails"
+    },
+    {
+        $match: {
+            "customerDetails.membership": { $ne: "premium" }
+        }
+    }
+]);
+db.students.aggregate([
+    {
+        $lookup: {
+            from: "courses",
+            localField: "courseId",
+            foreignField: "_id",
+            as: "courseDetails"
+        }
+    },
+    {
+        $unwind: "$courseDetails"
+    },
+    {
+        $lookup: {
+            from: "instructors",
+            localField: "courseDetails.instructorId",
+            foreignField: "_id",
+            as: "instructorDetails"
+        }
+    },
+    {
+        $unwind: "$instructorDetails"
+    },
+    {
+        $project: {
+            studentName: "$name",
+            courseName: "$courseDetails.course_name",
+            instructorName: "$instructorDetails.name"
+        }
+    }
+]);
+db.purchases.aggregate([
+    {
+        $lookup: {
+            from: "customers",
+            localField: "customerId",
+            foreignField: "_id",
+            as: "customerDetails"
+        }
+    },
+    {
+        $unwind: "$customerDetails"
+    },
+    {
+        $match: {
+            "customerDetails.loyaltyPoints": { $gte: 1000 }
+        }
+    }
+]);
+db.products.aggregate([
+    {
+        $match: {
+            $and: [
+                { category: "electronics" },
+                { price: { $lt: 500 } },
+                { stock: { $gt: 10 } }
+            ]
+        }
+    }
+]);
+
+
+
+ 
